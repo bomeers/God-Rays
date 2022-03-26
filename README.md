@@ -25,7 +25,15 @@
 </p>
 <br>
 
+## Setup
+To run this application locally:
+```
+npm i
+npm run dev
+```
+
 ## Todo
 - [x] Find way to listen for chat events in tiktok live session
 - [ ] Implement function to play sound + light up an LED for 2 seconds
 - [ ] [Implement python script executor](https://stackoverflow.com/a/23452742/10082088)
+- [ ] Implement Shell JS
