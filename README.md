@@ -1,7 +1,7 @@
 <br />
 <p align="center">
   <a href="https://github.com/bocodes/God-Rays">
-    <div align="center" style="font-size: 30px"><img src="src/public/images/logo.png" height="400px" /></div>
+    <div align="center" style="font-size: 30px"><img src="public/images/logo.png" height="400px" /></div>
   </a>
 
   <p align="center">
