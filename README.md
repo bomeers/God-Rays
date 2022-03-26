@@ -15,6 +15,6 @@
 <br>
 
 ## Todo
-[ ] Find way to listen for chat events in tiktok live session
+[x] Find way to listen for chat events in tiktok live session
 
 [ ] Implement function to play sound + light up an LED for 2 seconds
