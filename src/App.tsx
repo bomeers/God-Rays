@@ -1,14 +1,12 @@
-import { useState } from 'react'
 import React from 'react'
-import ReactDOM from 'react-dom';
-import $ from 'jquery';
 import './App.css'
 import connectTTL from './components/TikTokLive'
+import ColorPicker from './components/ColorPicker'
 
 function App() {
-    const [count, setCount] = useState(0)
 
     return (
+        <>
         <div className="App">
             <div className="head">
                 <h1>TikTok LIVE Chat Reader</h1>
@@ -51,6 +49,8 @@ function App() {
                 </tr>
             </table>
         </div>
+        {/* <ColorPicker/> */}
+        </>
     )
 }
 
