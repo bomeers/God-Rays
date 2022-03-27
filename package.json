@@ -12,6 +12,7 @@
     "express": "^4.17.3",
     "jquery": "^3.6.0",
     "react": "^17.0.2",
+    "react-colorful": "^5.5.1",
     "react-dom": "^17.0.2",
     "socket.io": "^4.4.1",
     "tiktok-livestream-chat-connector": "^0.9.15"
