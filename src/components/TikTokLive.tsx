@@ -1,29 +1,120 @@
+require('dotenv').config();
+
+const express = require('express');
+const { createServer } = require('http');
+const { Server } = require('socket.io');
+const { WebcastPushConnection } = require('tiktok-livestream-chat-connector');
+
+const app = express();
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+    cors: {
+        origin: '*'
+    }
+});
+
+let globalConnectionCount = 0;
+
+setInterval(() => {
+    io.emit('statistic', { globalConnectionCount });
+}, 5000)
+
+
+io.on('connection', (socket: any) => {
+    let chatConnection: any;
+
+    function disconnectChat() {
+        if (chatConnection) {
+            chatConnection.disconnect();
+            chatConnection = null;
+        }
+    }
+
+    socket.on('setUniqueId', (uniqueId: any, options: any) => {
+
+        console.log('connecting', uniqueId, options);
+
+        let thisConnection = new WebcastPushConnection(uniqueId, options);
+
+        thisConnection.connect().then((state: any) => {
+            disconnectChat();
+            chatConnection = thisConnection;
+            if (!socket.connected) {
+                disconnectChat();
+                return;
+            }
+            socket.emit('setUniqueIdSuccess', state);
+        }).catch((err: any) => {
+            socket.emit('setUniqueIdFailed', err.toString());
+        })
+
+        thisConnection.on('roomUser', (msg: any) => socket.emit('roomUser', msg));
+        thisConnection.on('member', (msg: any) => socket.emit('member', msg));
+        thisConnection.on('chat', (msg: any) => socket.emit('chat', msg));
+        thisConnection.on('gift', (msg: any) => socket.emit('gift', msg));
+        thisConnection.on('social', (msg: any) => socket.emit('social', msg));
+        thisConnection.on('like', (msg: any) => socket.emit('like', msg));
+        thisConnection.on('streamEnd', () => socket.emit('streamEnd'));
+
+        thisConnection.on('connected', () => {
+            console.log("chatConnection connected");
+            globalConnectionCount += 1;
+        });
+
+        thisConnection.on('disconnected', () => {
+            console.log("chatConnection disconnected");
+            globalConnectionCount -= 1;
+        });
+
+        thisConnection.on('error', (err: any) => {
+            console.error(err);
+        });
+    })
+
+    socket.on('disconnect', () => {
+        disconnectChat();
+        console.log('client disconnected');
+    })
+
+    console.log('client connected');
+});
+
+// Server frontend files
+app.use(express.static('public'));
+
+httpServer.listen(process.env.PORT || 80);
+
+
+
+
+
+
 let ioConnection = new io();
 
 let viewerCount = 0;
 let likeCount = 0;
 let diamondsCount = 0;
 
-// $(document).ready(() => {
-//     $('#connectButton').click(connect);
-//     $('#uniqueIdInput').on('keyup', function (e) {
-//         if (e.key === 'Enter') {
-//             connect();
-//         }
-//     });
-// })
+$(document).ready(() => {
+    $('#connectButton').click(connect);
+    $('#uniqueIdInput').on('keyup', function (e) {
+        if (e.key === 'Enter') {
+            connect();
+        }
+    });
+})
 
-// function connect() {
-//     let uniqueId = $('#uniqueIdInput').val();
-//     if (uniqueId !== '') {
-//         ioConnection.emit('setUniqueId', uniqueId, {
-//             enableExtendedGiftInfo: true
-//         });
-//         $('#stateText').text('Connecting...');
-//     } else {
-//         alert('no username entered');
-//     }
-// }
+function connect() {
+    let uniqueId = $('#uniqueIdInput').val();
+    if (uniqueId !== '') {
+        ioConnection.emit('setUniqueId', uniqueId, {
+            enableExtendedGiftInfo: true
+        });
+        $('#stateText').text('Connecting...');
+    } else {
+        alert('no username entered');
+    }
+}
 
 function sanitize(text: string) {
     return text.replace(/</g, '&lt;')
@@ -41,7 +132,7 @@ function isPendingStreak(data: any) {
     return data.gift.gift_type === 1 && data.gift.repeat_end === 0;
 }
 
-function addChatItem(color: string, data: any, text: string, summarize: any) {
+function addChatItem(color: any, data: any, text: string, summarize: any) {
     let container = $('.chatcontainer');
 
     if (container.find('div').length > 500) {
@@ -139,7 +230,7 @@ ioConnection.on('roomUser', (msg: any) => {
 // like stats
 ioConnection.on('like', (msg: any) => {
     if (typeof msg.likeCount === 'number') {
-        addChatItem('#447dd4', msg, msg.label.replace('{0:user}', '').replace('likes', `${msg.likeCount} likes`))
+        addChatItem('#447dd4', msg, msg.label.replace('{0:user}', '').replace('likes', `${msg.likeCount} likes`), '')
     }
 
     if (typeof msg.totalLikeCount === 'number') {
@@ -163,11 +254,11 @@ ioConnection.on('member', (msg: any) => {
     }, joinMsgDelay);
 })
 
-ioConnection.on('chat', (msg) => {
-    addChatItem('', msg, msg.comment);
+ioConnection.on('chat', (msg: any) => {
+    addChatItem('', msg, msg.comment, '');
 })
 
-ioConnection.on('gift', (data) => {
+ioConnection.on('gift', (data: any) => {
     addGiftItem(data);
 
     if (!isPendingStreak(data) && data.extendedGiftInfo.diamond_count > 0) {
@@ -177,7 +268,9 @@ ioConnection.on('gift', (data) => {
 })
 
 // share, follow
-ioConnection.on('social', (data) => {
+ioConnection.on('social', (data: any) => {
     let color = data.displayType.includes('follow') ? '#ff005e' : '#2fb816';
-    addChatItem(color, data, data.label.replace('{0:user}', ''));
+    addChatItem(color, data, data.label.replace('{0:user}', ''), '');
 })
+
+export default {}
