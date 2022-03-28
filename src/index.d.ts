@@ -1,1 +1,0 @@
-declare module "tiktok-livestream-chat-connector";

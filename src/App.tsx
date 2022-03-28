@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import './App.css'
-import { WebcastPushConnection } from 'tiktok-livestream-chat-connector';
+// @ts-ignore
+import { WebcastPushConnection } from 'tiktok-livestream-chat-connector'
 
 function App() {
-    const [count, setCount] = useState(0)
+    const [count, setCount] = useState(0);
     require('dotenv').config();
 
     const express = require('express');
