@@ -1,3 +1,6 @@
+import os
+import sys
+from twitchio.ext import commands
 from TikTokLive import TikTokLiveClient
 from TikTokLive.types.events import CommentEvent, ConnectEvent, LikeEvent, GiftEvent, FollowEvent
 
@@ -13,7 +16,7 @@ class bcolors:
     UNDERLINE = '\033[4m'
 
 # Instantiate the client with the user's username
-client: TikTokLiveClient = TikTokLiveClient(unique_id="@duncanastv")
+client: TikTokLiveClient = TikTokLiveClient(unique_id="@kronozeo")
 
 # Define how you want to handle specific events via decorator
 @client.on("connect")
@@ -22,7 +25,6 @@ async def on_connect(_: ConnectEvent):
 
 # TODO: implement like stacking per user
 # TODO: implement like leaderboard
-@client.on("like")
 async def on_like(event: LikeEvent):
     print(f"❤️  {bcolors.OKCYAN + event.user.nickname + bcolors.ENDC} liked the stream! x{event.likeCount}")
 
@@ -45,11 +47,9 @@ async def on_gift(event: GiftEvent):
 
 # Define handling an event via "callback"
 client.add_listener("comment", on_comment)
-# client.add_listener("like", on_like)
+client.add_listener("like", on_like)
 client.add_listener("gift", on_gift)
 client.add_listener("follow", on_follow)
 
 if __name__ == '__main__':
-    # Run the client and block the main thread
-    # await client.start() to run non-blocking
     client.run()
